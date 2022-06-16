@@ -1,0 +1,64 @@
+﻿// Conways Game Of Life on GPU ruleset:
+// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
+// 2. Any live cell with two or three live neighbours lives on to the next generation.
+// 3. Any live cell with more than three live neighbours dies, as if by overpopulation.
+// 4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
+
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel GameOfLife
+
+//define kernel dimensions
+#define X_SIZE 8
+#define Y_SIZE 8
+
+float Width;
+float Height;
+sampler2D Input;
+
+RWTexture2D<float4> Result;
+
+[numthreads(X_SIZE,Y_SIZE,1)]
+void GameOfLife (uint3 id : SV_DispatchThreadID)
+{
+	float2 position = float2((id.x) / Width, (id.y) / Height);
+	float2 pixelSize = float2(1.0 / Width, 1.0 / Height);	
+	float4 currentPixel = tex2Dlod(Input, float4(position.x, position.y, 0, 0));	
+
+	float4 neighborPixels = float4(0,0,0,0);//init neighbor
+	//=== check and count neighbors ===
+	// neighbor check north
+	neighborPixels += tex2Dlod(Input, float4(position.x + pixelSize.x, position.y + pixelSize.y, 0, 0));
+	neighborPixels += tex2Dlod(Input, float4(position.x, position.y + pixelSize.y, 0, 0));
+	neighborPixels += tex2Dlod(Input, float4(position.x - pixelSize.x, position.y + pixelSize.y, 0, 0));
+	// neighbor check e/w
+	neighborPixels += tex2Dlod(Input, float4(position.x + pixelSize.x, position.y, 0, 0));
+	neighborPixels += tex2Dlod(Input, float4(position.x - pixelSize.x, position.y, 0, 0));
+	//  neighbor check south
+	neighborPixels += tex2Dlod(Input, float4(position.x + pixelSize.x, position.y - pixelSize.y, 0, 0));
+	neighborPixels += tex2Dlod(Input, float4(position.x, position.y - pixelSize.y, 0, 0));
+	neighborPixels += tex2Dlod(Input, float4(position.x - pixelSize.x, position.y - pixelSize.y, 0, 0));
+
+	//=== game of life rules logic ===
+	if (currentPixel.r > 0.5) //cell alive
+	{ 
+		if (neighborPixels.r > 1.5 && neighborPixels.r < 3.5) 
+		{ //rule 2 - between 2 and 3 neighbors
+			Result[id.xy] = float4(1, 1, 1, 1);		//keep alive until next gen
+		}
+		else 
+		{
+			Result[id.xy] = float4(0, 0, 0, 1);		//kill otherwise
+		}
+	}
+	else //already dead
+	{
+		if (neighborPixels.r > 2.5 && neighborPixels.r < 3.5) //has exactly 3
+		{ 
+			Result[id.xy] = float4(1, 1, 1, 1); //brign to life since exactly 3 neighbors
+		}
+		else //not 3
+		{
+			Result[id.xy] = float4(0, 0, 0, 1); //otherwise stay dead
+		}
+	}
+}
