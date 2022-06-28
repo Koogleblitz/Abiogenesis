@@ -1,5 +1,5 @@
 # Abiogenesis
-An experiment in reinforcment learning, genetic algorithms, natural selection, and the emergent behavior of cellular automata. Start with Conway's Game of Life, and add a cell-eating lifeform who's behavior is encoded by its "genes". What happens when there is an entire population of life forms with different genes? What happens when the rules of the cellular automata slowly changes by the hour like how earth's climate changes over millions of years? 
+An experiment in reinforcment learning, genetic algorithms, natural selection, and the emergent behavior of cellular automata. Start with Conway's Game of Life, and add a cell-eating lifeform who's behavior is encoded by its "genes". What happens when there is an entire population of life forms with different genes, all competing for the same resources? What happens when the rules of the cellular automata slowly changes by the hour like how earth's climate changes over millions of years? 
 
 
 ![1](https://user-images.githubusercontent.com/28118510/174016321-8d4b84d6-feba-4333-a1cf-807f7372ee72.jpg)
